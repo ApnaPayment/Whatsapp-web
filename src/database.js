@@ -153,7 +153,10 @@ function initDb() {
     db.prepare(
       "INSERT INTO agents (username, password_hash, name, role) VALUES (?, ?, ?, ?)"
     ).run('admin', hash, 'Administrator', 'admin');
-    console.log(`Default admin created  →  username: admin  password: ${pwd}`);
+    console.log('Default admin created  →  username: admin  password: [set via ADMIN_PASSWORD env var or check .env.example]');
+    if (!process.env.ADMIN_PASSWORD) {
+      console.warn('WARNING: Using default admin password "admin123". Set ADMIN_PASSWORD in .env before going to production.');
+    }
   }
 
   // Seed a couple of default labels (ignore if already present)

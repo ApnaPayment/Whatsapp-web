@@ -4,6 +4,9 @@ const jwt = require('jsonwebtoken');
 const { getAgentById } = require('../database');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'wa-crm-default-secret-change-in-production';
+if (!process.env.JWT_SECRET) {
+  console.warn('WARNING: JWT_SECRET is not set. Using insecure default. Set JWT_SECRET in .env before going to production.');
+}
 const JWT_EXPIRES = '7d';
 
 function signToken(agentId) {

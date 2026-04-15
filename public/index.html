@@ -7,89 +7,399 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <!-- Sidebar -->
+
+<!-- ── Login Screen ──────────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">💬</div>
+    <h1>WhatsApp CRM</h1>
+    <p class="login-sub">Sign in to your workspace</p>
+    <form id="login-form">
+      <div class="field">
+        <input type="text" id="login-username" placeholder="Username" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" required />
+      </div>
+      <p id="login-error" class="error-msg hidden"></p>
+      <button type="submit" class="btn-primary full-w" id="login-btn">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<!-- ── App Screen ────────────────────────────────────────────────────────── -->
+<div id="app-screen" class="hidden">
+
+  <!-- ── Sidebar ────────────────────────────────────────────────────────── -->
   <aside id="sidebar">
     <div class="sidebar-header">
-      <h1>💬 WA CRM</h1>
-      <div id="status-badge" class="badge disconnected">Disconnected</div>
+      <div class="sidebar-brand">
+        <span class="brand-icon">💬</span>
+        <span class="brand-name">WA CRM</span>
+      </div>
+      <div class="sidebar-header-right">
+        <span id="wa-badge" class="wa-badge disconnected" title="WhatsApp status">●</span>
+        <span id="agent-display" class="agent-display"></span>
+        <button id="btn-logout" class="icon-btn" title="Sign out">⏻</button>
+      </div>
     </div>
 
-    <nav class="tabs">
-      <button class="tab-btn active" data-tab="chats">Chats</button>
-      <button class="tab-btn" data-tab="contacts">Contacts</button>
+    <nav class="sidebar-nav">
+      <button class="snav-btn active" data-section="chats" title="Chats">
+        <span class="snav-icon">💬</span>
+        <span class="snav-label">Chats</span>
+        <span id="snav-unread-badge" class="nav-badge hidden">0</span>
+      </button>
+      <button class="snav-btn" data-section="tickets" title="Tickets">
+        <span class="snav-icon">🎫</span>
+        <span class="snav-label">Tickets</span>
+        <span id="snav-open-badge" class="nav-badge hidden">0</span>
+      </button>
+      <button class="snav-btn" data-section="contacts" title="Contacts">
+        <span class="snav-icon">👥</span>
+        <span class="snav-label">Contacts</span>
+      </button>
     </nav>
 
-    <!-- Chats list -->
-    <section id="tab-chats" class="tab-panel">
-      <div class="search-box">
+    <!-- Chats section -->
+    <div id="section-chats" class="sidebar-section">
+      <div class="section-search">
         <input type="text" id="chat-search" placeholder="Search chats…" />
       </div>
       <ul id="chat-list"></ul>
-    </section>
+    </div>
 
-    <!-- Contacts list -->
-    <section id="tab-contacts" class="tab-panel hidden">
-      <div class="search-box">
+    <!-- Tickets section -->
+    <div id="section-tickets" class="sidebar-section hidden">
+      <div class="section-search">
+        <input type="text" id="ticket-search" placeholder="Search tickets…" />
+      </div>
+      <div class="ticket-filters">
+        <select id="tf-status">
+          <option value="">All Status</option>
+          <option value="open">Open</option>
+          <option value="pending">Pending</option>
+          <option value="resolved">Resolved</option>
+          <option value="closed">Closed</option>
+        </select>
+        <select id="tf-priority">
+          <option value="">All Priority</option>
+          <option value="urgent">Urgent</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <select id="tf-assigned">
+          <option value="">All Agents</option>
+          <option value="me">My Tickets</option>
+          <option value="none">Unassigned</option>
+        </select>
+      </div>
+      <ul id="ticket-list"></ul>
+    </div>
+
+    <!-- Contacts section -->
+    <div id="section-contacts" class="sidebar-section hidden">
+      <div class="section-search">
         <input type="text" id="contact-search" placeholder="Search contacts…" />
       </div>
-      <button class="btn-primary full-width" id="btn-add-contact">+ Add Contact</button>
+      <button class="btn-add-item" id="btn-add-contact">+ Add Contact</button>
       <ul id="contact-list"></ul>
-    </section>
+    </div>
   </aside>
 
-  <!-- Main area -->
-  <main id="main">
-    <!-- QR panel -->
-    <section id="qr-panel" class="center-panel">
-      <div class="qr-card">
-        <h2>Scan to connect WhatsApp</h2>
-        <p>Open WhatsApp on your phone → Linked Devices → Link a Device</p>
-        <div id="qr-container"><span class="spinner"></span></div>
-        <p class="hint" id="qr-hint">Waiting for QR code…</p>
-      </div>
-    </section>
-
-    <!-- Chat view -->
-    <section id="chat-panel" class="hidden">
-      <header id="chat-header">
-        <div id="chat-title">Select a chat</div>
-      </header>
-      <div id="messages"></div>
-      <form id="send-form">
-        <input type="text" id="send-to" placeholder="Number (e.g. 919876543210)" />
-        <input type="text" id="send-body" placeholder="Type a message…" />
-        <button type="submit">Send</button>
-      </form>
-    </section>
-
-    <!-- Welcome panel (shown when connected but no chat selected) -->
-    <section id="welcome-panel" class="center-panel hidden">
-      <div class="welcome-card">
-        <h2>✅ WhatsApp Connected</h2>
-        <p>Select a chat from the sidebar or use the send box to start a conversation.</p>
-      </div>
-    </section>
-  </main>
-
-  <!-- Add/Edit Contact Modal -->
-  <div id="contact-modal" class="modal hidden">
-    <div class="modal-content">
-      <h3 id="modal-title">Add Contact</h3>
-      <input type="hidden" id="modal-id" />
-      <label>Phone * <input type="text" id="modal-phone" placeholder="919876543210" /></label>
-      <label>Name <input type="text" id="modal-name" placeholder="John Doe" /></label>
-      <label>Email <input type="text" id="modal-email" placeholder="john@example.com" /></label>
-      <label>Company <input type="text" id="modal-company" placeholder="Acme Inc." /></label>
-      <label>Tags (comma separated) <input type="text" id="modal-tags" placeholder="lead, vip" /></label>
-      <label>Notes <textarea id="modal-notes" rows="3"></textarea></label>
-      <div class="modal-actions">
-        <button id="modal-save" class="btn-primary">Save</button>
-        <button id="modal-cancel">Cancel</button>
+  <!-- ── Main Content Area ────────────────────────────────────────────────── -->
+  <main id="main-area">
+    <!-- Top toolbar -->
+    <div id="top-toolbar">
+      <div id="toolbar-title">WhatsApp CRM</div>
+      <div class="toolbar-actions">
+        <button class="tbar-btn" id="btn-new-chat">✉️ New Chat</button>
+        <button class="tbar-btn" data-view="analytics">📊 Analytics</button>
+        <button class="tbar-btn" data-view="templates">📝 Templates</button>
+        <button class="tbar-btn admin-only hidden" data-view="agents">⚙️ Agents</button>
       </div>
     </div>
-  </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/app.js"></script>
+    <!-- Welcome / QR view -->
+    <div id="view-welcome" class="view active">
+      <div class="center-card">
+        <div id="qr-container"><span class="spinner"></span></div>
+        <h2 id="qr-title">Connecting to WhatsApp…</h2>
+        <p id="qr-hint" class="muted">Please wait or scan the QR code below</p>
+      </div>
+    </div>
+
+    <!-- Chat view -->
+    <div id="view-chat" class="view hidden">
+      <div id="chat-view-header">
+        <div class="chat-header-info">
+          <div class="chat-avatar-sm" id="chat-avatar">?</div>
+          <div>
+            <div id="chat-header-name" class="chat-title">Select a chat</div>
+            <div id="chat-header-phone" class="chat-subtitle"></div>
+          </div>
+        </div>
+        <div class="chat-header-actions">
+          <button class="icon-btn" id="btn-toggle-crm" title="Toggle CRM panel">ℹ️</button>
+        </div>
+      </div>
+      <div id="messages"></div>
+      <!-- Template picker popup -->
+      <div id="template-picker" class="hidden">
+        <div class="tpl-picker-header">
+          <span>Quick Replies</span>
+          <button id="btn-close-tpl-picker">✕</button>
+        </div>
+        <input type="text" id="tpl-search" placeholder="Search templates…" />
+        <ul id="tpl-list"></ul>
+      </div>
+      <form id="send-form">
+        <button type="button" id="btn-open-tpl-picker" class="composer-btn" title="Quick replies (/)">/</button>
+        <input type="text" id="send-body" placeholder="Type a message…" autocomplete="off" />
+        <button type="submit" class="btn-send">➤</button>
+      </form>
+    </div>
+
+    <!-- Analytics view -->
+    <div id="view-analytics" class="view hidden">
+      <div class="view-header"><h2>📊 Analytics</h2></div>
+      <div class="analytics-content">
+        <div class="stats-row" id="stats-cards"></div>
+        <div class="analytics-row">
+          <div class="analytics-card">
+            <h3>Tickets by Priority</h3>
+            <div id="priority-chart"></div>
+          </div>
+          <div class="analytics-card">
+            <h3>Agent Workload</h3>
+            <table id="workload-table" class="data-table">
+              <thead><tr><th>Agent</th><th>Open Tickets</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="analytics-card analytics-card-full">
+          <h3>Messages (Last 14 Days)</h3>
+          <div id="messages-trend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Templates view -->
+    <div id="view-templates" class="view hidden">
+      <div class="view-header">
+        <h2>📝 Message Templates</h2>
+        <button class="btn-primary" id="btn-add-template">+ New Template</button>
+      </div>
+      <div class="view-body">
+        <table class="data-table" id="templates-table">
+          <thead>
+            <tr><th>Name</th><th>Category</th><th>Body</th><th>Actions</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Agents view (admin only) -->
+    <div id="view-agents" class="view hidden">
+      <div class="view-header">
+        <h2>⚙️ Agent Management</h2>
+        <button class="btn-primary" id="btn-add-agent">+ New Agent</button>
+      </div>
+      <div class="view-body">
+        <table class="data-table" id="agents-table">
+          <thead>
+            <tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── CRM Side Panel ──────────────────────────────────────────────────── -->
+  <aside id="crm-panel" class="hidden">
+    <div class="crm-panel-header">
+      <span>Conversation Details</span>
+      <button class="icon-btn" id="btn-close-crm">✕</button>
+    </div>
+    <div id="crm-content" class="crm-scroll">
+
+      <!-- Contact section -->
+      <div class="crm-section">
+        <div class="crm-section-title">Contact</div>
+        <div class="crm-contact-card">
+          <div class="crm-avatar" id="crm-avatar">?</div>
+          <div class="crm-contact-info">
+            <div class="crm-contact-name" id="crm-contact-name">—</div>
+            <div class="crm-contact-phone" id="crm-contact-phone"></div>
+            <div class="crm-contact-company" id="crm-contact-company"></div>
+          </div>
+        </div>
+        <button class="btn-sm" id="btn-crm-edit-contact">✏️ Edit Contact</button>
+      </div>
+
+      <!-- Ticket section -->
+      <div class="crm-section">
+        <div class="crm-section-title">Ticket</div>
+        <div id="crm-ticket-id" class="crm-ticket-id"></div>
+        <div class="crm-field-row">
+          <label>Status</label>
+          <select id="crm-status" class="crm-select">
+            <option value="open">Open</option>
+            <option value="pending">Pending</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+        <div class="crm-field-row">
+          <label>Priority</label>
+          <select id="crm-priority" class="crm-select">
+            <option value="urgent">🔴 Urgent</option>
+            <option value="high">🟠 High</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+        </div>
+        <div class="crm-field-row">
+          <label>Assigned To</label>
+          <select id="crm-assigned" class="crm-select">
+            <option value="">Unassigned</option>
+          </select>
+        </div>
+        <div id="crm-sla" class="crm-sla"></div>
+        <button class="btn-sm btn-primary" id="btn-save-ticket">Save Changes</button>
+      </div>
+
+      <!-- Labels section -->
+      <div class="crm-section">
+        <div class="crm-section-title">Labels</div>
+        <div id="crm-labels-list" class="labels-row"></div>
+        <div class="crm-label-add">
+          <select id="crm-label-select" class="crm-select crm-select-sm">
+            <option value="">Add label…</option>
+          </select>
+          <button class="btn-sm" id="btn-add-label-to-ticket">+</button>
+        </div>
+      </div>
+
+      <!-- Notes section -->
+      <div class="crm-section">
+        <div class="crm-section-title">
+          Notes
+          <button class="btn-sm ml-auto" id="btn-add-note">+ Note</button>
+        </div>
+        <div id="crm-notes-list" class="notes-list"></div>
+      </div>
+
+      <!-- Activity section -->
+      <div class="crm-section">
+        <div class="crm-section-title">Activity</div>
+        <div id="crm-activity-list" class="activity-list"></div>
+      </div>
+
+    </div>
+  </aside>
+
+</div><!-- end #app-screen -->
+
+<!-- ── Modals ────────────────────────────────────────────────────────────── -->
+
+<!-- Contact Modal -->
+<div id="contact-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3 id="contact-modal-title">Add Contact</h3>
+    <input type="hidden" id="cm-id" />
+    <label>Phone * <input type="text" id="cm-phone" placeholder="919876543210" /></label>
+    <label>Name <input type="text" id="cm-name" placeholder="John Doe" /></label>
+    <label>Email <input type="text" id="cm-email" placeholder="john@example.com" /></label>
+    <label>Company <input type="text" id="cm-company" placeholder="Acme Inc." /></label>
+    <label>Tags (comma separated) <input type="text" id="cm-tags" placeholder="lead, vip" /></label>
+    <label>Notes <textarea id="cm-notes" rows="3"></textarea></label>
+    <div class="modal-actions">
+      <button id="cm-cancel" class="btn-ghost">Cancel</button>
+      <button id="cm-save" class="btn-primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Note Modal -->
+<div id="note-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Add Note</h3>
+    <label>Note <textarea id="nm-body" rows="4" placeholder="Write an internal note…"></textarea></label>
+    <label class="checkbox-label">
+      <input type="checkbox" id="nm-internal" checked /> Internal note (not sent to customer)
+    </label>
+    <div class="modal-actions">
+      <button id="nm-cancel" class="btn-ghost">Cancel</button>
+      <button id="nm-save" class="btn-primary">Add Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- Template Modal -->
+<div id="template-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3 id="tpl-modal-title">New Template</h3>
+    <input type="hidden" id="tpl-id" />
+    <label>Name * <input type="text" id="tpl-name" placeholder="e.g. Welcome Message" /></label>
+    <label>Category
+      <select id="tpl-category">
+        <option value="general">General</option>
+        <option value="greeting">Greeting</option>
+        <option value="follow-up">Follow-up</option>
+        <option value="support">Support</option>
+        <option value="sales">Sales</option>
+      </select>
+    </label>
+    <label>Body * <textarea id="tpl-body" rows="5" placeholder="Hello {{name}}, how can I help you?"></textarea></label>
+    <div class="modal-actions">
+      <button id="tpl-cancel" class="btn-ghost">Cancel</button>
+      <button id="tpl-save" class="btn-primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Agent Modal -->
+<div id="agent-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3 id="agent-modal-title">New Agent</h3>
+    <input type="hidden" id="am-id" />
+    <label>Full Name * <input type="text" id="am-name" placeholder="Jane Doe" /></label>
+    <label>Username * <input type="text" id="am-username" placeholder="jane.doe" /></label>
+    <label>Email <input type="text" id="am-email" placeholder="jane@company.com" /></label>
+    <label>Password <input type="password" id="am-password" placeholder="Leave blank to keep current" /></label>
+    <label>Role
+      <select id="am-role">
+        <option value="agent">Agent</option>
+        <option value="manager">Manager</option>
+        <option value="admin">Admin</option>
+      </select>
+    </label>
+    <div class="modal-actions">
+      <button id="am-cancel" class="btn-ghost">Cancel</button>
+      <button id="am-save" class="btn-primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Chat Modal -->
+<div id="new-chat-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Start New Chat</h3>
+    <label>Phone Number * <input type="text" id="nc-phone" placeholder="919876543210 (with country code)" /></label>
+    <label>Message * <textarea id="nc-body" rows="3" placeholder="Type your first message…"></textarea></label>
+    <div class="modal-actions">
+      <button id="nc-cancel" class="btn-ghost">Cancel</button>
+      <button id="nc-send" class="btn-primary">Send</button>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/app.js"></script>
 </body>
 </html>
