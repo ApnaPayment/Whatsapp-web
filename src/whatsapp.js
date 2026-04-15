@@ -1,8 +1,12 @@
 'use strict';
 
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageTypes } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
-const { saveMessage, upsertChat, getContactByPhone, createContact } = require('./database');
+const {
+  saveMessage, upsertChat,
+  getContactByPhone, createContact,
+  getTicketByChatId, createTicket, updateTicket, addTicketActivity,
+} = require('./database');
 
 let client;
 let currentQr = null;
@@ -61,32 +65,78 @@ function initWhatsApp(io) {
         });
       }
 
+      // Determine message type label
+      const msgType = msg.type || 'chat';
+      const bodyText = msg.body || (msgType !== 'chat' ? `[${msgType}]` : '');
+
       // Save message
       saveMessage({
         chat_id: msg.from,
         message_id: msg.id._serialized,
         from_me: msg.fromMe,
-        body: msg.body,
+        body: bodyText,
         timestamp: msg.timestamp,
         contact_id: dbContact ? dbContact.id : null,
+        msg_type: msgType,
       });
 
       // Update chat record
       upsertChat({
         chat_id: msg.from,
         name: chat.name || phone,
-        last_message: msg.body,
+        last_message: bodyText,
         last_timestamp: msg.timestamp,
         unread_count: chat.unreadCount || 0,
       });
+
+      // ── CRM: auto-create or reopen ticket ──────────────────────────────────
+      let ticket = getTicketByChatId(msg.from);
+      if (!ticket) {
+        ticket = createTicket({
+          chat_id: msg.from,
+          contact_id: dbContact ? dbContact.id : null,
+          subject: `Chat with ${contact.pushname || contact.name || phone}`,
+          priority: 'medium',
+        });
+        addTicketActivity({
+          ticket_id: ticket.id,
+          agent_id: null,
+          action_type: 'created',
+          payload: { by: 'system', reason: 'First inbound message' },
+        });
+        io.emit('ticket_created', ticket);
+      } else if (['resolved', 'closed'].includes(ticket.status)) {
+        // Reopen closed/resolved ticket on new inbound message
+        updateTicket(ticket.id, { status: 'open' });
+        addTicketActivity({
+          ticket_id: ticket.id,
+          agent_id: null,
+          action_type: 'status_changed',
+          payload: { from: ticket.status, to: 'open', reason: 'New inbound message' },
+        });
+        ticket = getTicketByChatId(msg.from);
+        io.emit('ticket_updated', ticket);
+      }
+
+      // Record inbound message as ticket activity
+      if (ticket) {
+        addTicketActivity({
+          ticket_id: ticket.id,
+          agent_id: null,
+          action_type: 'message_in',
+          payload: { body: bodyText.slice(0, 100), type: msgType },
+        });
+      }
 
       io.emit('message', {
         chat_id: msg.from,
         message_id: msg.id._serialized,
         from_me: false,
-        body: msg.body,
+        body: bodyText,
+        msg_type: msgType,
         timestamp: msg.timestamp,
         contact: dbContact,
+        ticket,
       });
     } catch (err) {
       console.error('Error handling message:', err);
