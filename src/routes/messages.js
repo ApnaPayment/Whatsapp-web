@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database');
 const { sendMessage, getStatus } = require('../whatsapp');
-const { upsertChat, saveMessage } = require('../database');
+const { upsertChat, saveMessage, addTicketActivity, getTicketByChatId } = require('../database');
 
 router.post('/send', async (req, res) => {
   const { to, body } = req.body;
@@ -34,6 +34,17 @@ router.post('/send', async (req, res) => {
       unread_count: 0,
     });
 
+    // Record outbound message as ticket activity
+    const ticket = getTicketByChatId(chatId);
+    if (ticket) {
+      addTicketActivity({
+        ticket_id: ticket.id,
+        agent_id: req.agent ? req.agent.id : null,
+        action_type: 'message_out',
+        payload: { body: body.slice(0, 100) },
+      });
+    }
+
     res.json({ success: true, messageId: msg.id._serialized });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -43,7 +54,8 @@ router.post('/send', async (req, res) => {
 router.get('/search', (req, res) => {
   const q = (req.query.q || '').trim();
   if (!q) return res.json([]);
-  res.json(db.searchMessages(q));
+  const limit = parseInt(req.query.limit, 10) || 100;
+  res.json(db.searchMessages(q, limit));
 });
 
 module.exports = router;

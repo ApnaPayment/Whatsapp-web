@@ -5,7 +5,12 @@ const router = express.Router();
 const db = require('../database');
 
 router.get('/', (req, res) => {
-  res.json(db.getAllContacts());
+  const { q, page, limit } = req.query;
+  res.json(db.getAllContacts({
+    q: q || '',
+    page: parseInt(page, 10) || 1,
+    limit: parseInt(limit, 10) || 50,
+  }));
 });
 
 router.post('/', (req, res) => {
