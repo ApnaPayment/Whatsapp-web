@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatsApp CRM</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <h1>💬 WA CRM</h1>
+      <div id="status-badge" class="badge disconnected">Disconnected</div>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="chats">Chats</button>
+      <button class="tab-btn" data-tab="contacts">Contacts</button>
+    </nav>
+
+    <!-- Chats list -->
+    <section id="tab-chats" class="tab-panel">
+      <div class="search-box">
+        <input type="text" id="chat-search" placeholder="Search chats…" />
+      </div>
+      <ul id="chat-list"></ul>
+    </section>
+
+    <!-- Contacts list -->
+    <section id="tab-contacts" class="tab-panel hidden">
+      <div class="search-box">
+        <input type="text" id="contact-search" placeholder="Search contacts…" />
+      </div>
+      <button class="btn-primary full-width" id="btn-add-contact">+ Add Contact</button>
+      <ul id="contact-list"></ul>
+    </section>
+  </aside>
+
+  <!-- Main area -->
+  <main id="main">
+    <!-- QR panel -->
+    <section id="qr-panel" class="center-panel">
+      <div class="qr-card">
+        <h2>Scan to connect WhatsApp</h2>
+        <p>Open WhatsApp on your phone → Linked Devices → Link a Device</p>
+        <div id="qr-container"><span class="spinner"></span></div>
+        <p class="hint" id="qr-hint">Waiting for QR code…</p>
+      </div>
+    </section>
+
+    <!-- Chat view -->
+    <section id="chat-panel" class="hidden">
+      <header id="chat-header">
+        <div id="chat-title">Select a chat</div>
+      </header>
+      <div id="messages"></div>
+      <form id="send-form">
+        <input type="text" id="send-to" placeholder="Number (e.g. 919876543210)" />
+        <input type="text" id="send-body" placeholder="Type a message…" />
+        <button type="submit">Send</button>
+      </form>
+    </section>
+
+    <!-- Welcome panel (shown when connected but no chat selected) -->
+    <section id="welcome-panel" class="center-panel hidden">
+      <div class="welcome-card">
+        <h2>✅ WhatsApp Connected</h2>
+        <p>Select a chat from the sidebar or use the send box to start a conversation.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add/Edit Contact Modal -->
+  <div id="contact-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="modal-title">Add Contact</h3>
+      <input type="hidden" id="modal-id" />
+      <label>Phone * <input type="text" id="modal-phone" placeholder="919876543210" /></label>
+      <label>Name <input type="text" id="modal-name" placeholder="John Doe" /></label>
+      <label>Email <input type="text" id="modal-email" placeholder="john@example.com" /></label>
+      <label>Company <input type="text" id="modal-company" placeholder="Acme Inc." /></label>
+      <label>Tags (comma separated) <input type="text" id="modal-tags" placeholder="lead, vip" /></label>
+      <label>Notes <textarea id="modal-notes" rows="3"></textarea></label>
+      <div class="modal-actions">
+        <button id="modal-save" class="btn-primary">Save</button>
+        <button id="modal-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
